@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"log"
 
 	"github.com/poring86/codepix-go/domain/model"
 )
@@ -34,4 +35,17 @@ func (t *TransactionUseCase) Register(accountId string, amount float64, pixKeyto
 
 	return nil, errors.New("unable to process this transaction")
 
+}
+
+func (t *TransactionUseCase) Complete(transactionId string) (*model.Transaction, error) {
+	transaction, err := t.TransactionRepository.Find(transactionId)
+	if err != nil {
+		log.Println("Transaction not found", transactionId)
+		return nil, err
+	}
+
+	transaction.Status = model.TransactionConfirmed
+	err = t.TransactionRepository.Save(transaction)
+
+	return transaction, nil
 }
